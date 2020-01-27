@@ -48,7 +48,7 @@ class KeyVaultAuthHelper extends ConfidentialClientHelper {
     public TokenRequest createTokenRequest() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
         final String labClientSecret = BuildConfig.LAB_CLIENT_SECRET;
         if (TextUtils.isEmpty(labClientSecret)) {
-            return createTokenRequestWithClientAssertion();
+            return null;
         } else {
             return createTokenRequestWithClientSecret();
         }
