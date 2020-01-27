@@ -46,7 +46,7 @@ class KeyVaultAuthHelper extends ConfidentialClientHelper {
 
     @Override
     public TokenRequest createTokenRequest() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
-        final String labClientSecret = BuildConfig.LAB_CLIENT_SECRET;
+        final String labClientSecret = com.microsoft.identity.internal.testutils.BuildConfig.LAB_CLIENT_SECRET;
         if (TextUtils.isEmpty(labClientSecret)) {
             return null;
         } else {
@@ -54,16 +54,16 @@ class KeyVaultAuthHelper extends ConfidentialClientHelper {
         }
     }
 
-    public TokenRequest createTokenRequestWithClientSecret() {
+    private TokenRequest createTokenRequestWithClientSecret() {
         TokenRequest tr = new MicrosoftStsTokenRequest();
 
-        tr.setClientSecret(BuildConfig.LAB_CLIENT_SECRET);
+        tr.setClientSecret(com.microsoft.identity.internal.testutils.BuildConfig.LAB_CLIENT_SECRET);
         tr.setClientId(CLIENT_ID);
         tr.setScope(SCOPE);
         return tr;
     }
 
-    public TokenRequest createTokenRequestWithClientAssertion() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
+    private TokenRequest createTokenRequestWithClientAssertion() throws CertificateException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, NoSuchProviderException, IOException {
         CertificateCredential certificateCredential = new CertificateCredential.CertificateCredentialBuilder(CLIENT_ID)
                 .clientCertificateMetadata(new ClientCertificateMetadata(CERTIFICATE_ALIAS, null))
                 .keyStoreConfiguration(new KeyStoreConfiguration(KEYSTORE_TYPE, KEYSTORE_PROVIDER, null))
