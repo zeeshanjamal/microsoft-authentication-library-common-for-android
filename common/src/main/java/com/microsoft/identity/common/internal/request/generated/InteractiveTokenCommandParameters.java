@@ -1,14 +1,17 @@
 package com.microsoft.identity.common.internal.request.generated;
 
+import android.app.Activity;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.google.auto.value.AutoValue;
 import com.microsoft.identity.common.internal.authorities.Authority;
 import com.microsoft.identity.common.internal.dto.IAccountRecord;
 import com.microsoft.identity.common.internal.providers.oauth2.OpenIdConnectPromptParameter;
 import com.microsoft.identity.common.internal.ui.AuthorizationAgent;
+import com.microsoft.identity.common.internal.ui.browser.BrowserDescriptor;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,17 +26,10 @@ public abstract class InteractiveTokenCommandParameters
 
     public abstract Set<String> scopes();
 
-    public abstract String clientId();
-
-    public abstract String redirectUri();
-
     public abstract Authority authority();
 
     @Nullable
     public abstract IAccountRecord accountRecord();
-
-    @Nullable
-    public abstract Boolean forceRefresh();
 
     @Nullable
     public abstract String claimsRequestJson();
@@ -52,9 +48,15 @@ public abstract class InteractiveTokenCommandParameters
     @Nullable
     public abstract HashMap<String, String> requestHeaders();
 
-    public abstract AuthorizationAgent authorizationAgent();
+    public abstract AuthorizationAgent authorizationAgent(); // should not be in equal
 
-    public abstract boolean brokerBrowserSupportEnabled();
+    public abstract boolean brokerBrowserSupportEnabled(); // should not be in equal
+
+    public abstract Activity activity(); // should not be in equal
+
+    public abstract Fragment fragment(); // should not be in equal
+
+    public abstract List<BrowserDescriptor> browserSafeList(); // should not be in equal
 
     public static InteractiveTokenCommandParameters.Builder builder() {
         return new AutoValue_InteractiveTokenCommandParameters.Builder();
@@ -73,14 +75,8 @@ public abstract class InteractiveTokenCommandParameters
     }
 
     @AutoValue.Builder
-    public abstract static class Builder {
+    public abstract static class Builder extends CommandParameters.Builder<InteractiveTokenCommandParameters.Builder> {
         public abstract Builder setScopes(Set<String> value);
-
-        public abstract Builder setClientId(String value);
-
-        public abstract Builder setForceRefresh(Boolean value);
-
-        public abstract Builder setRedirectUri(String value);
 
         public abstract Builder setAuthority(Authority value);
 
@@ -101,6 +97,10 @@ public abstract class InteractiveTokenCommandParameters
         public abstract Builder setAccountRecord(IAccountRecord value);
 
         public abstract Builder setBrokerBrowserSupportEnabled(boolean value);
+
+        public abstract Builder setActivity(Activity value);
+
+        public abstract Builder setFragment(Fragment fragment);
 
         public abstract InteractiveTokenCommandParameters build();
     }

@@ -30,7 +30,7 @@ import com.microsoft.identity.common.exception.ClientException;
 import com.microsoft.identity.common.exception.ErrorStrings;
 import com.microsoft.identity.common.internal.logging.Logger;
 import com.microsoft.identity.common.internal.providers.oauth2.AuthorizationStrategy;
-import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandContext;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandParameters;
 import com.microsoft.identity.common.internal.ui.browser.BrowserAuthorizationStrategy;
 import com.microsoft.identity.common.internal.ui.browser.BrowserSelector;
@@ -49,38 +49,55 @@ public class AuthorizationStrategyFactory<GenericAuthorizationStrategy extends A
     }
 
     public GenericAuthorizationStrategy getAuthorizationStrategy(
-            @NonNull final InteractiveTokenCommandContext context,
-            @NonNull final InteractiveTokenCommandParameters parameters) {
+            @NonNull final CommandContext commandContext,
+            @NonNull final InteractiveTokenCommandParameters commandParameters) {
         //Valid if available browser installed. Will fallback to embedded webView if no browser available.
         final AuthorizationAgent validatedAuthorizationAgent = validAuthorizationAgent(
-                parameters.authorizationAgent(),
-                context.androidApplicationContext()
+                commandParameters.authorizationAgent(),
+                commandContext.androidApplicationContext()
         );
-        boolean isBrokerRequest = (parameters instanceof BrokerAcquireTokenOperationParameters);
+        boolean isBrokerRequest = false; //(parameters instanceof BrokerAcquireTokenOperationParameters);
 
         if (validatedAuthorizationAgent == AuthorizationAgent.WEBVIEW) {
             Logger.info(TAG, "Use webView for authorization.");
-            return (GenericAuthorizationStrategy) (new EmbeddedWebViewAuthorizationStrategy(context.androidActivity()));
+            return (GenericAuthorizationStrategy) (new EmbeddedWebViewAuthorizationStrategy(
+                    commandContext.androidApplicationContext(),
+                    commandParameters.activity(),
+                    commandParameters.fragment()));
         } else if (validatedAuthorizationAgent == AuthorizationAgent.DEFAULT) {
             // When the authorization agent is set to DEFAULT,
             // Use device browser auth flow as default.
             // Fall back to webview if no browser found.
             try {
-                BrowserSelector.select(context.androidApplicationContext(), context.browserSafeList());
+                BrowserSelector.select(commandContext.androidApplicationContext(), commandContext.browserSafeList());
             } catch (final ClientException exception) {
                 Logger.info(TAG, "No supported browser available found. Fallback to the webView authorization agent.");
                 if (exception.getErrorCode().equalsIgnoreCase(ErrorStrings.NO_AVAILABLE_BROWSER_FOUND)) {
-                    return (GenericAuthorizationStrategy) (new EmbeddedWebViewAuthorizationStrategy(context.androidActivity()));
+                    return (GenericAuthorizationStrategy) (new EmbeddedWebViewAuthorizationStrategy(
+                            commandContext.androidApplicationContext(),
+                            commandParameters.activity(),
+                            commandParameters.fragment()
+                    ));
                 }
             }
             Logger.info(TAG, "Use browser for authorization.");
-            final BrowserAuthorizationStrategy browserAuthorizationStrategy = new BrowserAuthorizationStrategy(context.androidActivity());
-            browserAuthorizationStrategy.setBrowserSafeList(context.browserSafeList());
+            final BrowserAuthorizationStrategy browserAuthorizationStrategy = new BrowserAuthorizationStrategy(
+                    commandContext.androidApplicationContext(),
+                    commandParameters.activity(),
+                    commandParameters.fragment()
+                    isBrokerRequest
+            );
+            browserAuthorizationStrategy.setBrowserSafeList(commandContext.browserSafeList());
             return (GenericAuthorizationStrategy) browserAuthorizationStrategy;
         } else {
             Logger.info(TAG, "Use browser for authorization.");
-            final BrowserAuthorizationStrategy browserAuthorizationStrategy = new BrowserAuthorizationStrategy(context.androidActivity());
-            browserAuthorizationStrategy.setBrowserSafeList(context.browserSafeList());
+            final BrowserAuthorizationStrategy browserAuthorizationStrategy = new BrowserAuthorizationStrategy(
+                    commandContext.androidApplicationContext(),
+                    commandParameters.activity(),
+                    commandParameters.fragment()
+                    isBrokerRequest
+            );
+            browserAuthorizationStrategy.setBrowserSafeList(commandContext.browserSafeList());
             return (GenericAuthorizationStrategy) browserAuthorizationStrategy;
         }
     }

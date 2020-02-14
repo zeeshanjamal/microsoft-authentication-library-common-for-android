@@ -24,11 +24,8 @@ import com.microsoft.identity.common.internal.logging.Logger;
 import com.microsoft.identity.common.internal.providers.microsoft.azureactivedirectory.AzureActiveDirectory;
 import com.microsoft.identity.common.internal.providers.oauth2.OpenIdConnectPromptParameter;
 import com.microsoft.identity.common.internal.request.generated.CommandContext;
-import com.microsoft.identity.common.internal.request.generated.IContext;
 import com.microsoft.identity.common.internal.request.generated.ITokenRequestParameters;
-import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandContext;
 import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandContext;
 import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandParameters;
 import com.microsoft.identity.common.internal.ui.AuthorizationAgent;
 import com.microsoft.identity.common.internal.ui.browser.Browser;
@@ -56,15 +53,15 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
 
     @Override
     public BrokerRequest brokerRequestFromAcquireTokenParameters(
-            @NonNull final InteractiveTokenCommandContext context,
+            @NonNull final CommandContext context,
             @NonNull final InteractiveTokenCommandParameters parameters) {
 
         Logger.info(TAG, "Constructing result bundle from AcquireTokenOperationParameters.");
 
-        final BrokerRequest brokerRequest =  new BrokerRequest.Builder()
+        final BrokerRequest brokerRequest = new BrokerRequest.Builder()
                 .authority(parameters.authority().getAuthorityURL().toString())
-                .scope(TextUtils.join( " ", parameters.scopes()))
-                .redirect(getRedirectUri(context,parameters))
+                .scope(TextUtils.join(" ", parameters.scopes()))
+                .redirect(getRedirectUri(context, parameters))
                 .clientId(parameters.clientId())
                 .username(parameters.loginHint())
                 .extraQueryStringParameter(
@@ -91,15 +88,15 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
 
     @Override
     public BrokerRequest brokerRequestFromSilentOperationParameters(
-            @NonNull final SilentTokenCommandContext context,
+            @NonNull final CommandContext context,
             @NonNull final SilentTokenCommandParameters parameters) {
 
         Logger.info(TAG, "Constructing result bundle from AcquireTokenSilentOperationParameters.");
 
-        final BrokerRequest brokerRequest =  new BrokerRequest.Builder()
+        final BrokerRequest brokerRequest = new BrokerRequest.Builder()
                 .authority(parameters.authority().getAuthorityURL().toString())
-                .scope(TextUtils.join( " ", parameters.scopes()))
-                .redirect(getRedirectUri(context,parameters))
+                .scope(TextUtils.join(" ", parameters.scopes()))
+                .redirect(getRedirectUri(context, parameters))
                 .clientId(parameters.clientId())
                 .homeAccountId(parameters.account().getHomeAccountId())
                 .localAccountId(parameters.account().getLocalAccountId())
@@ -308,9 +305,10 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
 
     /**
      * Create the request bundle for IMicrosoftAuthService.hello().
+     *
      * @param context IContext
      * @return request bundle
-     *
+     * <p>
      * Helper method to get redirect uri from parameters, calculates from package signature if not available.
      */
     private String getRedirectUri(@NonNull OperationParameters parameters) {
@@ -337,7 +335,7 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
     }
 
     public Bundle getRequestBundleForAcquireTokenSilent(
-            @NonNull final SilentTokenCommandContext commandContext,
+            @NonNull final CommandContext commandContext,
             @NonNull final SilentTokenCommandParameters commandParameters) {
         final MsalBrokerRequestAdapter msalBrokerRequestAdapter = new MsalBrokerRequestAdapter();
 
@@ -407,7 +405,7 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
      * @return
      */
     private String getRedirectUri(
-            @NonNull IContext context,
+            @NonNull CommandContext context,
             @NonNull ITokenRequestParameters parameters) {
         if (TextUtils.isEmpty(parameters.redirectUri())) {
             return BrokerValidator.getBrokerRedirectUri(
@@ -417,6 +415,7 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
         }
         return parameters.redirectUri();
     }
+
     public static List<BrowserDescriptor> getBrowserSafeListForBroker() {
         List<BrowserDescriptor> browserDescriptors = new ArrayList<>();
         final HashSet<String> signatureHashes = new HashSet();

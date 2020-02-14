@@ -20,17 +20,12 @@ public abstract class SilentTokenCommandParameters
 
     public abstract IAccountRecord account();
 
-    public abstract String clientId();
-
-    public abstract String redirectUri();
-
     public abstract Authority authority();
 
     @Nullable
     public abstract String claimsRequestJson();
 
-    @Nullable
-    public abstract Boolean forceRefresh();
+    public abstract boolean forceRefresh();
 
     public static Builder builder() {
         return new AutoValue_SilentTokenCommandParameters.Builder();
@@ -49,7 +44,7 @@ public abstract class SilentTokenCommandParameters
     }
 
     @AutoValue.Builder
-    public abstract static class Builder {
+    public abstract static class Builder extends CommandParameters.Builder<SilentTokenCommandParameters.Builder> {
         public abstract Builder setScopes(Set<String> value);
 
         public abstract Builder setAccount(IAccountRecord value);
@@ -62,7 +57,7 @@ public abstract class SilentTokenCommandParameters
 
         public abstract Builder setClaimsRequestJson(String value);
 
-        public abstract Builder setForceRefresh(Boolean value);
+        public abstract Builder setForceRefresh(boolean value);
 
         public abstract SilentTokenCommandParameters build();
     }

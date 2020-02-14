@@ -20,7 +20,7 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import androidx.annotation.NonNull;
 
@@ -28,28 +28,30 @@ import com.microsoft.identity.common.adal.internal.AuthenticationConstants;
 import com.microsoft.identity.common.exception.ClientException;
 import com.microsoft.identity.common.exception.ErrorStrings;
 import com.microsoft.identity.common.exception.UiRequiredException;
-import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandContext;
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandParameters;
 import com.microsoft.identity.common.internal.result.AcquireTokenResult;
 
 import java.util.List;
 
 public class SilentTokenCommand extends BaseCommand<AcquireTokenResult,
-        SilentTokenCommandContext,
+        CommandContext,
         SilentTokenCommandParameters,
         CommandCallback
         > {
 
     private static final String TAG = SilentTokenCommand.class.getSimpleName();
 
-    public SilentTokenCommand(@NonNull final SilentTokenCommandContext commandContext,
+    public SilentTokenCommand(@NonNull final CommandContext commandContext,
                               @NonNull final SilentTokenCommandParameters commandParameters,
                               @NonNull final BaseController controller,
                               @NonNull final CommandCallback callback) {
         super(commandContext, commandParameters, controller, callback);
     }
 
-    public SilentTokenCommand(@NonNull final SilentTokenCommandContext commandContext,
+    public SilentTokenCommand(@NonNull final CommandContext commandContext,
                               @NonNull final SilentTokenCommandParameters commandParameters,
                               @NonNull final List<BaseController> controllers,
                               @NonNull final CommandCallback callback) {

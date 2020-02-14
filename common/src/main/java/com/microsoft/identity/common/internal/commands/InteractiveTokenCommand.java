@@ -20,25 +20,27 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
 import com.microsoft.identity.common.internal.logging.Logger;
-import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandContext;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandParameters;
 import com.microsoft.identity.common.internal.result.AcquireTokenResult;
 
 public class InteractiveTokenCommand extends BaseCommand<AcquireTokenResult,
-        InteractiveTokenCommandContext,
+        CommandContext,
         InteractiveTokenCommandParameters,
         CommandCallback>
         implements AsyncCommand {
     private static final String TAG = InteractiveTokenCommand.class.getSimpleName();
 
-    public InteractiveTokenCommand(@NonNull final InteractiveTokenCommandContext commandContext,
+    public InteractiveTokenCommand(@NonNull final CommandContext commandContext,
                                    @NonNull final InteractiveTokenCommandParameters commandParameters,
                                    @NonNull final BaseController controller,
                                    @NonNull final CommandCallback callback) {

@@ -31,19 +31,18 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 
 import com.microsoft.identity.common.internal.broker.BrokerRequest;
-import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandContext;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandContext;
 import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandParameters;
 
 public interface IBrokerRequestAdapter {
 
     BrokerRequest brokerRequestFromAcquireTokenParameters(
-            @NonNull final InteractiveTokenCommandContext context,
+            @NonNull final CommandContext context,
             @NonNull final InteractiveTokenCommandParameters parameters);
 
     BrokerRequest brokerRequestFromSilentOperationParameters(
-            @NonNull final SilentTokenCommandContext context,
+            @NonNull final CommandContext context,
             @NonNull final SilentTokenCommandParameters parameters);
 
     BrokerAcquireTokenOperationParameters brokerInteractiveParametersFromActivity(Activity callingActivity);

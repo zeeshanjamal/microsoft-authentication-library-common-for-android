@@ -20,11 +20,13 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import androidx.annotation.NonNull;
 
-import com.microsoft.identity.common.internal.request.generated.RemoveAccountCommandContext;
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.RemoveAccountCommandParameters;
 
 import java.util.List;
@@ -34,19 +36,19 @@ import java.util.List;
  * {@see com.microsoft.identity.common.internal.controllers.CommandDispatcher}.
  */
 public class RemoveAccountCommand extends BaseCommand<Boolean,
-        RemoveAccountCommandContext,
+        CommandContext,
         RemoveAccountCommandParameters,
         CommandCallback> {
     private static final String TAG = RemoveAccountCommand.class.getSimpleName();
 
-    public RemoveAccountCommand(@NonNull final RemoveAccountCommandContext commandContext,
+    public RemoveAccountCommand(@NonNull final CommandContext commandContext,
                                 @NonNull final RemoveAccountCommandParameters commandParameters,
                                 @NonNull final List<BaseController> controllers,
                                 @NonNull final CommandCallback callback) {
         super(commandContext, commandParameters, controllers, callback);
     }
 
-    public RemoveAccountCommand(@NonNull final RemoveAccountCommandContext commandContext,
+    public RemoveAccountCommand(@NonNull final CommandContext commandContext,
                                 @NonNull final RemoveAccountCommandParameters commandParameters,
                                 @NonNull final BaseController controller,
                                 @NonNull final CommandCallback callback) {

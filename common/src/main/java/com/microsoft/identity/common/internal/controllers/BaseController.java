@@ -27,10 +27,10 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 
 import com.microsoft.identity.common.exception.ClientException;
-import com.microsoft.identity.common.exception.ErrorStrings;
 import com.microsoft.identity.common.exception.ServiceException;
 import com.microsoft.identity.common.internal.authorities.Authority;
 import com.microsoft.identity.common.internal.authorities.AzureActiveDirectoryAudience;
+import com.microsoft.identity.common.internal.authorities.AzureActiveDirectoryAuthority;
 import com.microsoft.identity.common.internal.cache.ICacheRecord;
 import com.microsoft.identity.common.internal.cache.SchemaUtil;
 import com.microsoft.identity.common.internal.dto.AccessTokenRecord;
@@ -48,33 +48,21 @@ import com.microsoft.identity.common.internal.providers.oauth2.OAuth2Strategy;
 import com.microsoft.identity.common.internal.providers.oauth2.OAuth2TokenCache;
 import com.microsoft.identity.common.internal.providers.oauth2.TokenResponse;
 import com.microsoft.identity.common.internal.providers.oauth2.TokenResult;
-import com.microsoft.identity.common.internal.request.AcquireTokenOperationParameters;
-import com.microsoft.identity.common.internal.request.AcquireTokenSilentOperationParameters;
-import com.microsoft.identity.common.internal.request.BrokerAcquireTokenSilentOperationParameters;
-import com.microsoft.identity.common.internal.request.OperationParameters;
 import com.microsoft.identity.common.internal.request.SdkType;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.CommandParameters;
-import com.microsoft.identity.common.internal.request.generated.GetCurrentAccountCommandContext;
 import com.microsoft.identity.common.internal.request.generated.GetCurrentAccountCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.GetDeviceModeCommandContext;
 import com.microsoft.identity.common.internal.request.generated.GetDeviceModeCommandParameters;
 import com.microsoft.identity.common.internal.request.generated.IContext;
 import com.microsoft.identity.common.internal.request.generated.IScopesAddable;
 import com.microsoft.identity.common.internal.request.generated.ITokenRequestParameters;
-import com.microsoft.identity.common.internal.request.generated.InteractiveTokenCommandContext;
-import com.microsoft.identity.common.internal.request.generated.LoadAccountCommandContext;
 import com.microsoft.identity.common.internal.request.generated.LoadAccountCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.RemoveAccountCommandContext;
 import com.microsoft.identity.common.internal.request.generated.RemoveAccountCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.RemoveCurrentAccountCommandContext;
 import com.microsoft.identity.common.internal.request.generated.RemoveCurrentAccountCommandParameters;
-import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandContext;
 import com.microsoft.identity.common.internal.result.AcquireTokenResult;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -90,7 +78,7 @@ public abstract class BaseController<
 
     private static final String TAG = BaseController.class.getSimpleName();
 
-    public abstract AcquireTokenResult acquireToken(final InteractiveTokenCommandContext context,
+    public abstract AcquireTokenResult acquireToken(final CommandContext context,
                                                     final GenericInteractiveTokenCommandParameters request)
             throws Exception;
 
@@ -100,27 +88,27 @@ public abstract class BaseController<
             final Intent data
     );
 
-    public abstract AcquireTokenResult acquireTokenSilent(final SilentTokenCommandContext context,
+    public abstract AcquireTokenResult acquireTokenSilent(final CommandContext context,
                                                           final GenericSilentTokenCommandParameters request)
             throws Exception;
 
-    public abstract List<ICacheRecord> getAccounts(final LoadAccountCommandContext context,
+    public abstract List<ICacheRecord> getAccounts(final CommandContext context,
                                                    final LoadAccountCommandParameters parameters)
             throws Exception;
 
-    public abstract boolean removeAccount(final RemoveAccountCommandContext context,
+    public abstract boolean removeAccount(final CommandContext context,
                                           final RemoveAccountCommandParameters parameters)
             throws Exception;
 
-    public abstract boolean getDeviceMode(final GetDeviceModeCommandContext context,
+    public abstract boolean getDeviceMode(final CommandContext context,
                                           final GetDeviceModeCommandParameters parameters)
             throws Exception;
 
-    public abstract List<ICacheRecord> getCurrentAccount(final GetCurrentAccountCommandContext context,
+    public abstract List<ICacheRecord> getCurrentAccount(final CommandContext context,
                                                          final GetCurrentAccountCommandParameters parameters)
             throws Exception;
 
-    public abstract boolean removeCurrentAccount(final RemoveCurrentAccountCommandContext context,
+    public abstract boolean removeCurrentAccount(final CommandContext context,
                                                  final RemoveCurrentAccountCommandParameters parameters)
             throws Exception;
 
@@ -136,10 +124,10 @@ public abstract class BaseController<
     protected abstract TokenResult performTokenRequest(@NonNull final OAuth2Strategy strategy,
                                                        @NonNull final AuthorizationRequest request,
                                                        @NonNull final AuthorizationResponse response,
-                                                       @NonNull final InteractiveTokenCommandContext context)
+                                                       @NonNull final CommandContext context)
             throws IOException, ClientException;
 
-    protected abstract void renewAccessToken(@NonNull final SilentTokenCommandContext context,
+    protected abstract void renewAccessToken(@NonNull final CommandContext context,
                                              @NonNull final GenericSilentTokenCommandParameters parameters,
                                              @NonNull final AcquireTokenResult acquireTokenSilentResult,
                                              @NonNull final OAuth2TokenCache tokenCache,
@@ -270,23 +258,23 @@ public abstract class BaseController<
     }
 
     protected abstract AccountRecord getCachedAccountRecord(
-            SilentTokenCommandContext context,
+            CommandContext context,
             GenericSilentTokenCommandParameters parameters) throws ClientException;
 
     /**
      * Helper method which returns false if the tenant id of the authority
      * doesn't match with the tenant of the Access token for AADAuthority.
-     *
+     * <p>
      * Returns true otherwise.
      */
     protected boolean isRequestAuthorityRealmSameAsATRealm(@NonNull final Authority requestAuthority,
                                                            @NonNull final AccessTokenRecord accessTokenRecord)
             throws ServiceException, ClientException {
-        if(requestAuthority instanceof AzureActiveDirectoryAuthority){
+        if (requestAuthority instanceof AzureActiveDirectoryAuthority) {
 
             String tenantId = ((AzureActiveDirectoryAuthority) requestAuthority).getAudience().getTenantId();
 
-            if(AzureActiveDirectoryAudience.isHomeTenantAlias(tenantId)) {
+            if (AzureActiveDirectoryAudience.isHomeTenantAlias(tenantId)) {
                 // if realm on AT and home account's tenant id do not match, we have a token for guest and
                 // requested authority here is for home, so return false we need to refresh the token
                 final String utidFromHomeAccountId = accessTokenRecord
@@ -295,7 +283,7 @@ public abstract class BaseController<
 
                 return utidFromHomeAccountId.equalsIgnoreCase(accessTokenRecord.getRealm());
 
-            }else {
+            } else {
                 tenantId = ((AzureActiveDirectoryAuthority) requestAuthority)
                         .getAudience()
                         .getTenantUuidForAlias(requestAuthority.getAuthorityURL().toString());

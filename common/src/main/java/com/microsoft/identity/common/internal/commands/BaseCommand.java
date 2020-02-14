@@ -20,11 +20,12 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import androidx.annotation.NonNull;
 
-import com.microsoft.identity.common.internal.request.OperationParameters;
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
 import com.microsoft.identity.common.internal.request.generated.CommandContext;
 import com.microsoft.identity.common.internal.request.generated.CommandParameters;
 

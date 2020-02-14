@@ -25,7 +25,7 @@ package com.microsoft.identity.common.unit;
 import android.util.Log;
 
 import com.microsoft.identity.common.internal.authorities.Authority;
-import com.microsoft.identity.common.internal.controllers.BaseCommand;
+import com.microsoft.identity.common.internal.commands.BaseCommand;
 import com.microsoft.identity.common.internal.request.generated.SilentTokenCommandParameters;
 
 import org.junit.Test;

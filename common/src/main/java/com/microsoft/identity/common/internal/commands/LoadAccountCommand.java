@@ -20,13 +20,15 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import androidx.annotation.NonNull;
 
 import com.microsoft.identity.common.internal.cache.ICacheRecord;
-import com.microsoft.identity.common.internal.request.generated.GetCurrentAccountCommandContext;
-import com.microsoft.identity.common.internal.request.generated.GetCurrentAccountCommandParameters;
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
+import com.microsoft.identity.common.internal.request.generated.LoadAccountCommandParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,25 +37,26 @@ import java.util.List;
  * Command class to call controllers to load accounts and return the account list to
  * {@see com.microsoft.identity.common.internal.controllers.CommandDispatcher}.
  */
-public class GetCurrentAccountCommand extends BaseCommand<List<ICacheRecord>,
-        GetCurrentAccountCommandContext,
-        GetCurrentAccountCommandParameters,
+public class LoadAccountCommand extends BaseCommand<List<ICacheRecord>,
+        CommandContext,
+        LoadAccountCommandParameters,
         CommandCallback> {
-    private static final String TAG = GetCurrentAccountCommand.class.getSimpleName();
+    private static final String TAG = LoadAccountCommand.class.getSimpleName();
 
-    public GetCurrentAccountCommand(@NonNull final GetCurrentAccountCommandContext commandContext,
-                                    @NonNull final GetCurrentAccountCommandParameters commandParameters,
-                                    @NonNull final BaseController controller,
-                                    @NonNull final CommandCallback callback) {
+    public LoadAccountCommand(@NonNull final CommandContext commandContext,
+                              @NonNull final LoadAccountCommandParameters commandParameters,
+                              @NonNull final BaseController controller,
+                              @NonNull final CommandCallback callback) {
         super(commandContext, commandParameters, controller, callback);
     }
 
-    public GetCurrentAccountCommand(@NonNull final GetCurrentAccountCommandContext commandContext,
-                                    @NonNull final GetCurrentAccountCommandParameters commandParameters,
-                                    @NonNull final List<BaseController> controllers,
-                                    @NonNull final CommandCallback callback) {
+    public LoadAccountCommand(@NonNull final CommandContext commandContext,
+                              @NonNull final LoadAccountCommandParameters commandParameters,
+                              @NonNull final List<BaseController> controllers,
+                              @NonNull final CommandCallback callback) {
         super(commandContext, commandParameters, controllers, callback);
     }
+
 
     @Override
     public List<ICacheRecord> execute() throws Exception {
@@ -69,7 +72,7 @@ public class GetCurrentAccountCommand extends BaseCommand<List<ICacheRecord>,
                             + controller.getClass().getSimpleName()
             );
 
-            result.addAll(controller.getCurrentAccount(this.getContext(), this.getParameters()));
+            result.addAll(controller.getAccounts(this.getContext(), this.getParameters()));
         }
 
         return result;

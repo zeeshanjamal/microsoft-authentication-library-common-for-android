@@ -37,6 +37,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.microsoft.identity.common.exception.BaseException;
 import com.microsoft.identity.common.exception.IntuneAppProtectionPolicyRequiredException;
 import com.microsoft.identity.common.exception.UserCancelException;
+import com.microsoft.identity.common.internal.commands.BaseCommand;
+import com.microsoft.identity.common.internal.commands.InteractiveTokenCommand;
 import com.microsoft.identity.common.internal.eststelemetry.EstsTelemetry;
 import com.microsoft.identity.common.internal.logging.DiagnosticContext;
 import com.microsoft.identity.common.internal.logging.Logger;

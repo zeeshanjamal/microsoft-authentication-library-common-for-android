@@ -20,33 +20,36 @@
 //  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
-package com.microsoft.identity.common.internal.controllers;
+package com.microsoft.identity.common.internal.commands;
 
 import androidx.annotation.NonNull;
 
-import com.microsoft.identity.common.internal.request.generated.GetDeviceModeCommandContext;
-import com.microsoft.identity.common.internal.request.generated.GetDeviceModeCommandParameters;
+import com.microsoft.identity.common.internal.controllers.BaseController;
+import com.microsoft.identity.common.internal.controllers.CommandCallback;
+import com.microsoft.identity.common.internal.request.generated.CommandContext;
+import com.microsoft.identity.common.internal.request.generated.RemoveCurrentAccountCommandParameters;
 
 /**
  * Command class to call controllers to remove the account and return the result to
  * {@see com.microsoft.identity.common.internal.controllers.CommandDispatcher}.
  */
-public class GetDeviceModeCommand extends BaseCommand<Boolean,
-        GetDeviceModeCommandContext,
-        GetDeviceModeCommandParameters,
+public class RemoveCurrentAccountCommand extends BaseCommand<Boolean,
+        CommandContext,
+        RemoveCurrentAccountCommandParameters,
         CommandCallback> {
-    private static final String TAG = GetDeviceModeCommand.class.getSimpleName();
+    private static final String TAG = RemoveCurrentAccountCommand.class.getSimpleName();
 
-    public GetDeviceModeCommand(@NonNull final GetDeviceModeCommandContext commandContext,
-                                @NonNull final GetDeviceModeCommandParameters commandParameters,
-                                @NonNull final BaseController controller,
-                                @NonNull final CommandCallback callback) {
+
+    public RemoveCurrentAccountCommand(@NonNull final CommandContext commandContext,
+                                       @NonNull final RemoveCurrentAccountCommandParameters commandParameters,
+                                       @NonNull final BaseController controller,
+                                       @NonNull final CommandCallback callback) {
         super(commandContext, commandParameters, controller, callback);
     }
 
     @Override
     public Boolean execute() throws Exception {
-        return getDefaultController().getDeviceMode(this.getContext(), this.getParameters());
+        return getDefaultController().removeCurrentAccount(this.getContext(), this.getParameters());
     }
 
     @Override
