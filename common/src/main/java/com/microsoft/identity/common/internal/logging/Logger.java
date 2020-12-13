@@ -52,6 +52,8 @@ public final class Logger {
     // Disable to Logcat logging by default.
     private static boolean sAllowLogcat = false;
 
+    private static boolean sLogInBackground = false;
+
     /**
      * Enum class for LogLevel that the sdk recognizes.
      */
@@ -452,42 +454,69 @@ public final class Logger {
                      @Nullable final String message,
                      @Nullable final Throwable throwable,
                      final boolean containsPII) {
-        sLogExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (logLevel.compareTo(mLogLevel) > 0) {
-                    return;
+        if (sLogInBackground) {
+            sLogExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    logInternal(
+                            tag,
+                            logLevel,
+                            correlationID,
+                            message,
+                            throwable,
+                            containsPII
+                    );
                 }
+            });
+        } else {
+            logInternal(
+                    tag,
+                    logLevel,
+                    correlationID,
+                    message,
+                    throwable,
+                    containsPII
+            );
+        }
+    }
 
-                // Developer turns off PII logging, if the log meLoggerSettingssage contains any PII,
-                // we should not send it.
-                if (!sAllowPii && containsPII) {
-                    return;
-                }
+    private void logInternal(final String tag,
+                     final LogLevel logLevel,
+                     @Nullable final String correlationID,
+                     @Nullable final String message,
+                     @Nullable final Throwable throwable,
+                     final boolean containsPII) {
+        if (logLevel.compareTo(mLogLevel) > 0) {
+            return;
+        }
 
-                //Format the log message.
-                final String logMessage = formatMessage(correlationID, message, throwable);
+        // Developer turns off PII logging, if the log meLoggerSettingssage contains any PII,
+        // we should not send it.
+        if (!sAllowPii && containsPII) {
+            return;
+        }
 
-                // Send logs into Logcat.
-                if (sAllowLogcat) {
-                    sendLogcatLogs(tag, logLevel, logMessage);
-                }
+        //Format the log message.
+        final String logMessage = formatMessage(correlationID, message, throwable);
 
-                // Send logs into external logger callback.
-                final ILoggerCallback externalLogger = mExternalLogger;
+        // Send logs into Logcat.
+        if (sAllowLogcat) {
+            sendLogcatLogs(tag, logLevel, logMessage);
+        }
 
-                if (null != externalLogger) {
-                    try {
-                        mExternalLogger.log(tag, logLevel, logMessage, containsPII);
-                    } catch (final Exception e) {
-                        // log message as warning to report callback error issue
-                        if (!containsPII || sAllowPii) {
-                            Log.w(tag, String.format(CUSTOM_LOG_ERROR, logMessage));
-                        }
-                    }
+        // Send logs into external logger callback.
+        final ILoggerCallback externalLogger = mExternalLogger;
+
+        if (null != externalLogger) {
+            try {
+                mExternalLogger.log(tag, logLevel, logMessage, containsPII);
+            } catch (final Exception e) {
+                // log message as warning to report callback error issue
+                if (!containsPII || sAllowPii) {
+                    Log.w(tag, String.format(CUSTOM_LOG_ERROR, logMessage));
                 }
             }
-        });
+        }
     }
 
     /**
