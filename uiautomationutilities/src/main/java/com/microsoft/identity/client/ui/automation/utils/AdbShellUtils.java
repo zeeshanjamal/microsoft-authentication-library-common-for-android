@@ -26,7 +26,6 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.uiautomator.UiDevice;
 
-import com.microsoft.identity.client.ui.automation.app.OutlookApp;
 import com.microsoft.identity.client.ui.automation.logging.Logger;
 
 import org.junit.Assert;
@@ -147,6 +146,16 @@ public class AdbShellUtils {
     public static void disableAutomaticTimeZone() {
         Logger.i(TAG, "Disable automatic time zone on the device..");
         putGlobalSettings("auto_time", "0");
+    }
+
+    /**
+     * Disable animations on the device.
+     */
+    public static void disableAnimations() {
+        Logger.i(TAG, "Disable animations on the device..");
+        putGlobalSettings("animator_duration_scale", "0");
+        putGlobalSettings("transition_animation_scale", "0");
+        putGlobalSettings("window_animation_scale", "0");
     }
 
     private static String getApkPath(@NonNull final String packageName) {
