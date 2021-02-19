@@ -60,7 +60,7 @@ public class RulesHelper {
         ruleChain = ruleChain.around(new UiAutomatorTestRule());
 
         Log.i(TAG, "Adding ResetAutomaticTimeZoneTestRule");
-        ruleChain = ruleChain.around(new ResetAutomaticTimeZoneTestRule());
+        ruleChain = ruleChain.around(new ResetDeviceSettingsTestRule());
 
         Log.i(TAG, "Adding DeviceLockSetRule");
         ruleChain = ruleChain.around(new DevicePinSetupRule(broker));

@@ -22,8 +22,6 @@
 //  THE SOFTWARE.
 package com.microsoft.identity.client.ui.automation.rules;
 
-import android.util.Log;
-
 import com.microsoft.identity.client.ui.automation.logging.Logger;
 import com.microsoft.identity.client.ui.automation.utils.AdbShellUtils;
 
@@ -32,11 +30,12 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * A Test Rule to reset (enable) Automatic Time Zone on the device prior to executing the test case.
+ * A Test Rule to reset device settings to desired values on the device prior to executing the
+ * test case.
  */
-public class ResetAutomaticTimeZoneTestRule implements TestRule {
+public class ResetDeviceSettingsTestRule implements TestRule {
 
-    private final static String TAG = ResetAutomaticTimeZoneTestRule.class.getSimpleName();
+    private final static String TAG = ResetDeviceSettingsTestRule.class.getSimpleName();
 
     @Override
     public Statement apply(final Statement base, final Description description) {
@@ -45,6 +44,7 @@ public class ResetAutomaticTimeZoneTestRule implements TestRule {
             public void evaluate() throws Throwable {
                 Logger.i(TAG, "Applying rule....");
                 AdbShellUtils.enableAutomaticTimeZone();
+                AdbShellUtils.disableAnimations();
                 base.evaluate();
             }
         };
