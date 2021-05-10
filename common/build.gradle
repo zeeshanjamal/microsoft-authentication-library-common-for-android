@@ -126,7 +126,7 @@ dependencies {
     //Java 8 - Desugaring - Enabled/Disabled via plugin
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$rootProject.ext.coreLibraryDesugaringVersion"
 
-    api(project(":common4j")) {
+    api("com.microsoft.identity:common4j:0.0.4") {
         transitive = false
     }
 
