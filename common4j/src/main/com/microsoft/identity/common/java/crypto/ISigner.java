@@ -20,17 +20,40 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-package com.microsoft.identity.common.java.util;
+package com.microsoft.identity.common.java.crypto;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.microsoft.identity.common.java.exception.ClientException;
 
-public class ThrowableUtil {
-    public static synchronized String getStackTraceAsString(final Throwable throwable) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        throwable.printStackTrace(pw);
-        pw.flush();
-        return sw.toString();
-    }
+import java.security.PrivateKey;
+
+import lombok.NonNull;
+
+/**
+ * Interface for a Signer.
+ */
+public interface ISigner {
+
+    /**
+     * Signs with a {@link PrivateKey}.
+     *
+     * @param key                  the key to sign.
+     * @param signingAlgorithm     algorithm for signing the data.
+     * @param dataToBeSigned       the data to be signed.
+     * @return signed data.
+     */
+    byte[] sign(@NonNull final PrivateKey key,
+                @NonNull final String signingAlgorithm,
+                byte[] dataToBeSigned) throws ClientException;
+
+    /**
+     * Signs with a HMac key.
+     *
+     * @param keyData           the HMac key data.
+     * @param hmacAlgorithm     algorithm for generating key/signing the data.
+     * @param dataToBeSigned    the data to be signed.
+     * @return signed data.
+     */
+    byte[] signWithHMac(final byte[] keyData,
+                        @NonNull final String hmacAlgorithm,
+                        final byte[] dataToBeSigned) throws ClientException;
 }

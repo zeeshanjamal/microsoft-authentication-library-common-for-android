@@ -20,17 +20,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-package com.microsoft.identity.common.java.util;
+package com.microsoft.identity.common.java.crypto;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import com.microsoft.identity.common.java.exception.ClientException;
 
-public class ThrowableUtil {
-    public static synchronized String getStackTraceAsString(final Throwable throwable) {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        throwable.printStackTrace(pw);
-        pw.flush();
-        return sw.toString();
-    }
+import java.security.Key;
+import java.security.PrivateKey;
+
+import javax.crypto.SecretKey;
+
+import lombok.NonNull;
+
+/**
+ * Interface for a Decryptor.
+ */
+public interface IDecryptor {
+
+    /**
+     * Decrypt the given byte array.
+     *
+     * @param key               the key to decrypt with.
+     * @param decryptAlgorithm  algorithm to decrypt with.
+     * @param iv                an initialization vector (IV).
+     * @param dataToBeDecrypted the data to be encrypted.
+     * @return a decrypted byte array.
+     */
+    byte[] decrypt(@NonNull final Key key,
+                   @NonNull final String decryptAlgorithm,
+                   final byte[] iv,
+                   final byte[] dataToBeDecrypted) throws ClientException;
 }
