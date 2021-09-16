@@ -119,6 +119,9 @@ public class MicrosoftAuthClient extends BoundServiceClient<IMicrosoftAuthServic
             case MSAL_GENERATE_SHR:
                 return microsoftAuthService.generateSignedHttpRequest(inputBundle);
 
+            case MSAL_CALCULATOR:
+                return microsoftAuthService.calculatorApiCall(inputBundle);
+
             default:
                 final String errorMessage = "Operation " + brokerOperationBundle.getOperation().name() + " is not supported by MicrosoftAuthClient.";
                 throw new BrokerCommunicationException(

@@ -27,6 +27,7 @@ import static com.microsoft.identity.common.adal.internal.AuthenticationConstant
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_NAME;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_VERSION_CODE;
 import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_ACQUIRE_TOKEN_SILENT;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_CALCULATOR;
 import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GENERATE_SHR;
 import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_ACCOUNTS;
 import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_CURRENT_ACCOUNT_IN_SHARED_DEVICE;
@@ -67,6 +68,7 @@ import com.microsoft.identity.common.internal.broker.ipc.IIpcStrategy;
 import com.microsoft.identity.common.internal.cache.HelloCache;
 import com.microsoft.identity.common.java.cache.MsalOAuth2TokenCache;
 import com.microsoft.identity.common.internal.commands.parameters.AndroidActivityInteractiveTokenCommandParameters;
+import com.microsoft.identity.common.java.commands.parameters.CalculatorApiCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.DeviceCodeFlowCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.GenerateShrCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.RemoveAccountCommandParameters;
@@ -805,6 +807,64 @@ public class BrokerMsalController extends BaseController {
     @Override
     public AcquireTokenResult acquireDeviceCodeFlowToken(@SuppressWarnings(WarningType.rawtype_warning) AuthorizationResult authorizationResult, DeviceCodeFlowCommandParameters commandParameters) throws ClientException {
         throw new ClientException("acquireDeviceCodeFlowToken() not supported in BrokerMsalController");
+    }
+
+    @Override
+    public double calculatorApiCall(final CalculatorApiCommandParameters parameters) throws BaseException {
+        return mBrokerOperationExecutor.execute(parameters,
+                new BrokerOperation<Double>() {
+                    private String negotiatedBrokerProtocolVersion;
+
+                    @Override
+                    public void performPrerequisites(final @NonNull IIpcStrategy strategy) throws BaseException {
+                        negotiatedBrokerProtocolVersion = hello(strategy, parameters.getRequiredBrokerProtocolVersion());
+                    }
+
+                    @Override
+                    public @NonNull
+                    BrokerOperationBundle getBundle() {
+                        return new BrokerOperationBundle(
+                                MSAL_CALCULATOR,
+                                mActiveBrokerPackageName,
+                                mRequestAdapter.getRequestBundleForCalculatorApi(
+                                        mApplicationContext,
+                                        parameters,
+                                        negotiatedBrokerProtocolVersion
+                                ));
+                    }
+
+                    @Override
+                    public @NonNull Double extractResultBundle(final @Nullable Bundle resultBundle) throws BaseException {
+                        if (null == resultBundle) {
+                            throw mResultAdapter.getExceptionForEmptyResultBundle();
+                        }
+
+                        try {
+                            double result = mResultAdapter.getCalculatorResultFromResultBundle(resultBundle);
+                            return result;
+                        }
+                        catch (Exception e){
+                            BaseException error = mResultAdapter.getBaseExceptionFromBundle(resultBundle);
+                            throw error;
+                        }
+                    }
+
+                    @Override
+                    public @NonNull
+                    String getMethodName() {
+                        return ":calculatorApi";
+                    }
+
+                    @Override
+                    public @NonNull
+                    String getTelemetryApiId() {
+                        return TelemetryEventStrings.Api.BROKER_CALCULATOR;
+                    }
+
+                    @Override
+                    public void putValueInSuccessEvent(@lombok.NonNull ApiEndEvent event, @lombok.NonNull Double result) {
+                    }
+                });
     }
 
     @Override

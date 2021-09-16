@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
+import com.microsoft.identity.common.java.commands.parameters.CalculatorApiCommandParameters;
 import com.microsoft.identity.common.java.configuration.LibraryConfiguration;
 import com.microsoft.identity.common.java.controllers.CommandDispatcher;
 import com.microsoft.identity.common.java.eststelemetry.PublicApiId;
@@ -832,6 +833,31 @@ public class LocalMSALController extends BaseController {
                     ServiceException.DEFAULT_STATUS_CODE,
                     null
             );
+        }
+    }
+
+    /**
+     * Calculator API call.
+     */
+    public double calculatorApiCall(CalculatorApiCommandParameters parameters) throws ArithmeticException{
+        double x = parameters.getX();
+        double y = parameters.getY();
+        char op = parameters.getOp();
+
+        switch (op) {
+            case '+':
+                return x + y;
+            case '-':
+                return x - y;
+            case 'x':
+                return x * y;
+            case '/':
+                if (y == 0){
+                    throw new ArithmeticException("/ by zero (MSAL)");
+                }
+                return x / y;
+            default:
+                return 0;
         }
     }
 }

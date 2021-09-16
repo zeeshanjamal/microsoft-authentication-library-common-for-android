@@ -126,6 +126,16 @@ public final class PublicApiId {
     public static final String BROKER_REFRESH_ON = "1202";
     //endregion
 
+    // region Calculator Api
+
+    // PublicClientApplication
+    //==============================================================================================
+    //TODO: Find a code to for this variable
+    public static final String CALCULATOR_API_WITH_CALLBACK = "NA";
+    public static final String BROKER_CALCULATOR_API_WITH_CALLBACK = "NA";
+
+    //endregion
+
 
 
     public static final String PCA_GET_DEVICE_MODE = "1200";

@@ -28,6 +28,7 @@ import androidx.annotation.NonNull;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.microsoft.identity.common.java.commands.parameters.CalculatorApiCommandParameters;
 import com.microsoft.identity.common.java.result.ILocalAuthenticationResult;
 import com.microsoft.identity.common.java.result.LocalAuthenticationResult;
 import com.microsoft.identity.common.java.cache.CacheRecord;
@@ -997,6 +998,11 @@ public class CommandDispatcherTest {
         @Override
         public AcquireTokenResult acquireDeviceCodeFlowToken(AuthorizationResult authorizationResult, DeviceCodeFlowCommandParameters parameters) throws Exception {
             return null;
+        }
+
+        @Override
+        public double calculatorApiCall(CalculatorApiCommandParameters parameters) throws Exception {
+            return 0;
         }
 
         @Override

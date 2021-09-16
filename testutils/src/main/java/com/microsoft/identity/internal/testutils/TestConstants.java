@@ -34,6 +34,7 @@ public class TestConstants {
         public static final String MULTIPLE_ACCOUNT_MODE_MOCK_TEST_CONFIG_FILE_PATH = CONFIG_FILE_PATH_PREFIX + "multiple_account_mock_test_config.json";
         public static final String SINGLE_ACCOUNT_MODE_MOCK_TEST_CONFIG_FILE_PATH = CONFIG_FILE_PATH_PREFIX + "single_account_mock_test_config.json";
         public static final String SINGLE_ACCOUNT_DCF_TEST_CONFIG_FILE_PATH = CONFIG_FILE_PATH_PREFIX + "single_account_dcf_test_config.json";
+        public static final String CALCULATOR_API_TEST_CONFIG_FILE_PATH = CONFIG_FILE_PATH_PREFIX + "calculator_api_test_config.json";
     }
 
     public static class Scopes {

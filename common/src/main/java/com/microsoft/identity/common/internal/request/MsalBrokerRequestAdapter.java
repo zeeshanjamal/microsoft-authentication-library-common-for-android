@@ -26,6 +26,9 @@ import static com.microsoft.identity.common.adal.internal.AuthenticationConstant
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.ACCOUNT_HOME_ACCOUNT_ID;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.ACCOUNT_REDIRECT;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.AUTH_SCHEME_PARAMS_POP;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_CALCULATOR_NUM_1;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_CALCULATOR_NUM_2;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_CALCULATOR_OP;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_REQUEST_V2;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_REQUEST_V2_COMPRESSED;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.CALLER_INFO_UID;
@@ -46,8 +49,10 @@ import androidx.annotation.Nullable;
 import com.microsoft.identity.common.AndroidPlatformComponents;
 import com.microsoft.identity.common.adal.internal.AuthenticationConstants;
 import com.microsoft.identity.common.internal.broker.BrokerRequest;
+import com.microsoft.identity.common.java.commands.parameters.CalculatorApiCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.GenerateShrCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.RemoveAccountCommandParameters;
+import com.microsoft.identity.common.java.request.SdkType;
 import com.microsoft.identity.common.java.ui.BrowserDescriptor;
 import com.microsoft.identity.common.internal.util.BrokerProtocolVersionUtil;
 import com.microsoft.identity.common.internal.util.QueryParamsAdapter;
@@ -204,6 +209,27 @@ public class MsalBrokerRequestAdapter implements IBrokerRequestAdapter {
                 brokerRequest,
                 negotiatedBrokerProtocolVersion
         );
+
+        requestBundle.putInt(
+                CALLER_INFO_UID,
+                context.getApplicationInfo().uid
+        );
+
+        return requestBundle;
+    }
+
+
+    public Bundle getRequestBundleForCalculatorApi(@NonNull final Context context,
+                                                        @NonNull final CalculatorApiCommandParameters parameters,
+                                                        @Nullable final String negotiatedBrokerProtocolVersion) {
+        final Bundle requestBundle = new Bundle();
+        requestBundle.putString(ACCOUNT_CLIENTID_KEY, parameters.getClientId());
+        requestBundle.putString(ACCOUNT_REDIRECT, parameters.getRedirectUri());
+        requestBundle.putString(NEGOTIATED_BP_VERSION_KEY, negotiatedBrokerProtocolVersion);
+
+        requestBundle.putDouble(BROKER_CALCULATOR_NUM_1, parameters.getX());
+        requestBundle.putDouble(BROKER_CALCULATOR_NUM_2, parameters.getY());
+        requestBundle.putChar(BROKER_CALCULATOR_OP, parameters.getOp());
 
         requestBundle.putInt(
                 CALLER_INFO_UID,

@@ -25,6 +25,7 @@ package com.microsoft.identity.common.java.controllers;
 import static com.microsoft.identity.common.java.authorities.Authority.B2C;
 
 
+import com.microsoft.identity.common.java.commands.parameters.CalculatorApiCommandParameters;
 import com.microsoft.identity.common.java.foci.FociQueryUtilities;
 import com.microsoft.identity.common.java.cache.MsalOAuth2TokenCache;
 import com.microsoft.identity.common.java.commands.parameters.BrokerSilentTokenCommandParameters;
@@ -150,6 +151,9 @@ public abstract class BaseController {
             throws Exception;
 
     public abstract AcquireTokenResult acquireDeviceCodeFlowToken(@SuppressWarnings(WarningType.rawtype_warning) final AuthorizationResult authorizationResult, final DeviceCodeFlowCommandParameters parameters)
+            throws Exception;
+
+    public abstract double calculatorApiCall(final CalculatorApiCommandParameters parameters)
             throws Exception;
 
     /**

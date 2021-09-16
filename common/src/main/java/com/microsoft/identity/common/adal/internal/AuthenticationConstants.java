@@ -1150,6 +1150,26 @@ public final class AuthenticationConstants {
         public static final String REDIRECT_SSL_PREFIX = "https://";
 
         /**
+         * Represents the first number in the calculator operation
+         */
+        public static final String BROKER_CALCULATOR_NUM_1 = "calculator_num_1";
+
+        /**
+         * Represents the second number in the calculator operation
+         */
+        public static final String BROKER_CALCULATOR_NUM_2 = "calculator_num_2";
+
+        /**
+         * Represents the operator in the calculator operation
+         */
+        public static final String BROKER_CALCULATOR_OP = "calculator_op";
+
+        /**
+         * Represents the double result from the calculator api.
+         */
+        public static final String BROKER_CALCULATOR_RESULT = "calculator_result";
+
+        /**
          * Prefix in the redirect for PlayStore.
          */
         public static final String PLAY_STORE_INSTALL_PREFIX = "market://details?id=";
@@ -1332,6 +1352,8 @@ public final class AuthenticationConstants {
         public static final String REMOVE_ACCOUNT_FROM_SHARED_DEVICE = "REMOVE_ACCOUNT_FROM_SHARED_DEVICE";
 
         public static final String GENERATE_SHR = "GENERATE_SHR";
+
+        public static final String CALCULATOR = "CALCULATOR_API_CALL";
     }
 
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -1377,6 +1399,7 @@ public final class AuthenticationConstants {
             GET_DEVICE_MODE(MSAL_GET_DEVICE_MODE_PATH, null, VERSION_3),
             SIGN_OUT_FROM_SHARED_DEVICE(MSAL_SIGN_OUT_FROM_SHARED_DEVICE_PATH, null, VERSION_3),
             GENERATE_SHR(GENERATE_SHR_PATH, null, VERSION_6),
+            CALCULATOR(CALCULATOR_PATH, VERSION_3, null),
             BROKER_HELLO(BROKER_API_HELLO_PATH, BROKER_VERSION_1, null),
             BROKER_GET_ACCOUNTS(BROKER_API_GET_BROKER_ACCOUNTS_PATH, BROKER_VERSION_1, null),
             BROKER_REMOVE_ACCOUNT(BROKER_API_REMOVE_BROKER_ACCOUNT_PATH, BROKER_VERSION_1, null),
@@ -1444,6 +1467,11 @@ public final class AuthenticationConstants {
          * URI Path constant for MSAL-to-Broker generateShr request using ContentProvider.
          */
         public static final String GENERATE_SHR_PATH = "/generateShr";
+
+        /**
+         * URI Path constant for MSAL-to-Broker calculator api using ContentProvider.
+         */
+        public static final String CALCULATOR_PATH = "/calculatorApiCall";
 
         /**
          * URI Path constant for BrokerApi-to-Broker hello request using ContentProvider.

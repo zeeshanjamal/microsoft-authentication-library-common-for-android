@@ -47,4 +47,6 @@ interface IMicrosoftAuthService {
     Bundle removeAccountFromSharedDevice(in Bundle bundle);
 
     Bundle generateSignedHttpRequest(in Bundle bundle);
+
+    Bundle calculatorApiCall(in Bundle bundle);
 }

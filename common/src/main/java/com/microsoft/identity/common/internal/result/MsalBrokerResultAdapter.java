@@ -66,6 +66,7 @@ import java.util.List;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_ACCOUNTS;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_ACCOUNTS_COMPRESSED;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_ACTIVITY_NAME;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_CALCULATOR_RESULT;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_DEVICE_MODE;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_GENERATE_SHR_RESULT;
 import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.BROKER_PACKAGE_NAME;
@@ -681,5 +682,19 @@ public class MsalBrokerResultAdapter implements IBrokerResultAdapter {
         );
 
         return shrResult;
+    }
+
+    public Bundle bundleFromCalculatorApi(final double result){
+        final Bundle resultBundle = new Bundle();
+        resultBundle.putDouble(BROKER_CALCULATOR_RESULT, result);
+        return resultBundle;
+    }
+
+    public Double getCalculatorResultFromResultBundle(@NonNull final Bundle bundle) throws Exception {
+        if(!bundle.containsKey(BROKER_CALCULATOR_RESULT)){
+            throw new Exception();
+        }
+
+        return bundle.getDouble(BROKER_CALCULATOR_RESULT);
     }
 }
