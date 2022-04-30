@@ -44,7 +44,7 @@ public class LoadLabUserTestRule implements TestRule {
 
     private final static String TAG = LoadLabUserTestRule.class.getSimpleName();
 
-    public static final long TEMP_USER_WAIT_TIME = TimeUnit.SECONDS.toMillis(20);
+    public static final long TEMP_USER_WAIT_TIME = TimeUnit.SECONDS.toMillis(25);
 
     private LabUserQuery query;
     private String tempUserType;
