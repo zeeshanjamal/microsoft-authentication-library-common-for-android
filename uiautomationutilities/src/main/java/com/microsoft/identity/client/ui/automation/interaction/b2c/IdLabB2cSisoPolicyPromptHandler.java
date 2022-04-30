@@ -33,6 +33,8 @@ import com.microsoft.identity.client.ui.automation.logging.Logger;
 import com.microsoft.identity.client.ui.automation.utils.UiAutomatorUtils;
 import com.microsoft.identity.internal.testutils.labutils.LabConstants;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A Prompt handler for MSIDLAB B2C SISO Policy.
  */
@@ -56,6 +58,13 @@ public class IdLabB2cSisoPolicyPromptHandler extends AbstractPromptHandler {
 
         if (isExternalIdP) {
             assert b2CProvider.getIdpSelectionBtnResourceId() != null;
+            if (b2CProvider == B2CProvider.Facebook) {
+                try {
+                    Thread.sleep(TimeUnit.SECONDS.toMillis(3));
+                } catch (final InterruptedException e) {
+                    Logger.e(TAG, "Failed to sleep", e);
+                }
+            }
             UiAutomatorUtils.handleButtonClick(b2CProvider.getIdpSelectionBtnResourceId());
         }
 
