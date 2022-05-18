@@ -23,46 +23,30 @@
 package com.microsoft.identity.client.ui.automation.utils;
 
 import androidx.annotation.NonNull;
-import androidx.test.core.app.ApplicationProvider;
-import androidx.test.uiautomator.UiDevice;
 
-import com.microsoft.identity.client.ui.automation.app.OutlookApp;
+import com.microsoft.identity.client.ui.automation.adb.AdbServer;
+import com.microsoft.identity.client.ui.automation.adb.IAdbServer;
 import com.microsoft.identity.client.ui.automation.logging.Logger;
 
 import org.junit.Assert;
-
-import java.io.IOException;
-
-import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * This class contains utility methods that can be used to interact with the ADB Shell from within
  * code during the execution of a UI Test.
  */
+@Deprecated
 public class AdbShellUtils {
 
     private final static String TAG = AdbShellUtils.class.getSimpleName();
 
+    private static final IAdbServer sAdbServer = AdbServer.INSTANCE;
+
     public static String executeShellCommand(@NonNull final String command) {
-        Logger.i(TAG, "Execute the given command:" + command + " on the shell..");
-        final UiDevice device = UiDevice.getInstance(getInstrumentation());
-        try {
-            return device.executeShellCommand(command);
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
+        return sAdbServer.executeShellCommand(command);
     }
 
     public static String executeShellCommandAsCurrentPackage(@NonNull final String command) {
-        Logger.i(TAG, "Execute given shell command:" + command + " on Current Package..");
-        final UiDevice device = UiDevice.getInstance(getInstrumentation());
-        try {
-            final String pkg = ApplicationProvider.getApplicationContext().getPackageName();
-            final String completeCmd = "run-as " + pkg + " " + command;
-            return device.executeShellCommand(completeCmd);
-        } catch (final IOException e) {
-            throw new AssertionError(e);
-        }
+        return sAdbServer.executeShellCommandAsCurrentPackage(command);
     }
 
     /**
