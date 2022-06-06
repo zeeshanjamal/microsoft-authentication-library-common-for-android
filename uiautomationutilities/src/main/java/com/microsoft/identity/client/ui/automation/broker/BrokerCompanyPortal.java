@@ -46,10 +46,12 @@ import com.microsoft.identity.client.ui.automation.utils.UiAutomatorUtils;
 import org.junit.Assert;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 
 import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.FIND_UI_ELEMENT_TIMEOUT;
+import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.ENROLL_WAIT_DURATION;
 import static org.junit.Assert.fail;
 
 /**
@@ -172,7 +174,7 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
     @Override
     public void enrollDevice(@NonNull final String username,
                              @NonNull final String password) {
-        Logger.i(TAG, "Enroll Device for the given account..");
+        Logger.i(TAG, "Enroll Device for the given account...");
         launch(); // launch CP app
 
         handleFirstRun(); // handle CP first run
@@ -223,6 +225,14 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
             ((SamsungSettings) deviceSettings).enrollInKnox();
         }
 
+        // Seems like we are failing here sometimes because enrollment takes longer than expected
+        // adding a brief wait to improve odds of pass
+        try {
+            Thread.sleep(ENROLL_WAIT_DURATION);
+        } catch (Exception e){
+            Assert.fail("Failed on thread sleep: " + e);
+        }
+
         // make sure we are on the page to complete setup
         final UiObject setupCompletePage = UiAutomatorUtils.obtainUiObjectWithResourceId(
                 "com.microsoft.windowsintune.companyportal:id/setup_title"
@@ -256,6 +266,82 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
 
         // Enrollment has been performed successfully
         enrollmentPerformedSuccessfully = true;
+    }
+
+    public void setupWorkProfile(@NonNull final String username,
+                                 @NonNull final String password) {
+        Logger.i(TAG, "Setup work profile for the given account...");
+        launch(); // launch CP app
+
+        handleFirstRun(); // handle CP first run
+
+        // click Sign In button on CP welcome page
+        UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/sign_in_button");
+
+        final PromptHandlerParameters promptHandlerParameters = PromptHandlerParameters.builder()
+                .prompt(PromptParameter.LOGIN)
+                .consentPageExpected(false)
+                .expectingLoginPageAccountPicker(false)
+                .sessionExpected(false)
+                .loginHint(null)
+                .build();
+
+        final AadPromptHandler aadPromptHandler = new AadPromptHandler(promptHandlerParameters);
+
+        Logger.i(TAG, "Handle prompt in AAD login page for work profile setup..");
+        // handle AAD login page
+        aadPromptHandler.handlePrompt(username, password);
+
+        // click on BEGIN button to start enroll
+        UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/setup_positive_button");
+
+        // click CONTINUE to ack privacy page
+        UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/ContinueButton");
+
+        // click NEXT to ack Android system permissions requirements
+        UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/bullet_list_page_forward_button");
+
+        // grant permission
+        CommonUtils.grantPackagePermission();
+
+        // Activate CP as admin
+        TestContext.getTestContext().getTestDevice().getSettings().activateAdmin();
+
+        final ISettings deviceSettings = TestContext.getTestContext().getTestDevice().getSettings();
+
+        // if on a Samsung device, also need to handle in Knox
+        if (deviceSettings instanceof SamsungSettings) {
+            ((SamsungSettings) deviceSettings).enrollInKnox();
+        }
+
+        final UiObject workProfileSetupScreen = UiAutomatorUtils.obtainUiObjectWithText("Let's set up your work profile");
+        Assert.assertTrue(
+                "Work Profile Setup - android setup page appears",
+                workProfileSetupScreen.exists()
+        );
+
+        // Device-side pages do not have resource-ids
+        try {
+            UiAutomatorUtils.obtainUiObjectWithText("Accept & continue").click();
+            UiAutomatorUtils.obtainUiObjectWithText("Next").click();
+        }
+        catch (Exception e){
+            throw new AssertionError(e);
+        }
+
+        // click CONTINUE to continue work profile setup
+        UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/setup_positive_button");
+
+        // complete work profile setup
+        UiObject doneButton = UiAutomatorUtils.obtainUiObjectWithResourceId("com.microsoft.windowsintune.companyportal:id/setup_center_button");
+        doneButton.waitForExists(ENROLL_WAIT_DURATION);
+        try {
+            doneButton.click();
+            UiAutomatorUtils.obtainUiObjectWithText("Got It").click();
+        }
+        catch (Exception e){
+            throw new AssertionError(e);
+        }
     }
 
     @Override
