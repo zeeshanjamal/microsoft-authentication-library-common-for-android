@@ -25,6 +25,8 @@ package com.microsoft.identity.common.java.telemetry.relay;
 import com.microsoft.identity.common.java.logging.Logger;
 import com.microsoft.identity.common.java.telemetry.observers.ITelemetryObserver;
 
+import java.util.Map;
+
 import lombok.NonNull;
 
 /**
@@ -66,9 +68,14 @@ public abstract class AbstractTelemetryRelayClient<T> implements ITelemetryObser
     }
 
     /**
-     * Invoked when an event is ready to be relayed
+     * Logs a telemetry event to the underlying telemetry implementation.
      */
     public abstract void relayEvent(@NonNull final T eventData) throws TelemetryRelayException;
+
+    /**
+     * Logs a telemetry event to the underlying telemetry implementation with the specified tableName.
+     */
+    public abstract void relayEvent(@NonNull final String tableName, @NonNull final Map<String, String> eventData) throws TelemetryRelayException;
 
     /**
      * Flush telemetry events to the database
