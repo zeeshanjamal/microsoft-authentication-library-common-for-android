@@ -22,11 +22,27 @@
 //  THE SOFTWARE.
 package com.microsoft.identity.common.internal.controllers;
 
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.CLIENT_ADVERTISED_MAXIMUM_BP_VERSION_KEY;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.CLIENT_CONFIGURED_MINIMUM_BP_VERSION_KEY;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_NAME;
+import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_VERSION_CODE;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_ACQUIRE_TOKEN_SILENT;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GENERATE_SHR;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_ACCOUNTS;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_CURRENT_ACCOUNT_IN_SHARED_DEVICE;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_DEVICE_MODE;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_INTENT_FOR_INTERACTIVE_REQUEST;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_REMOVE_ACCOUNT;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_SIGN_OUT_FROM_SHARED_DEVICE;
+import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_SSO_TOKEN;
+import static com.microsoft.identity.common.internal.controllers.BrokerOperationExecutor.BrokerOperation;
+import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterAliases.RETURN_BROKER_INTERACTIVE_ACQUIRE_TOKEN_RESULT;
+import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterFields.REQUEST_CODE;
+import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterFields.RESULT_CODE;
+
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -34,7 +50,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.microsoft.identity.common.AndroidPlatformComponents;
+import com.microsoft.identity.common.components.AndroidPlatformComponentsFactory;
 import com.microsoft.identity.common.PropertyBagUtil;
 import com.microsoft.identity.common.adal.internal.AuthenticationConstants;
 import com.microsoft.identity.common.internal.broker.BrokerActivity;
@@ -54,12 +70,11 @@ import com.microsoft.identity.common.internal.telemetry.Telemetry;
 import com.microsoft.identity.common.internal.telemetry.TelemetryEventStrings;
 import com.microsoft.identity.common.internal.telemetry.events.ApiEndEvent;
 import com.microsoft.identity.common.internal.telemetry.events.ApiStartEvent;
-import com.microsoft.identity.common.internal.ui.browser.Browser;
-import com.microsoft.identity.common.internal.ui.browser.BrowserSelector;
 import com.microsoft.identity.common.internal.util.AccountManagerUtil;
 import com.microsoft.identity.common.internal.util.StringUtil;
 import com.microsoft.identity.common.java.WarningType;
 import com.microsoft.identity.common.java.authorities.AzureActiveDirectoryAudience;
+import com.microsoft.identity.common.java.authscheme.PopAuthenticationSchemeWithClientKeyInternal;
 import com.microsoft.identity.common.java.cache.ICacheRecord;
 import com.microsoft.identity.common.java.cache.MsalOAuth2TokenCache;
 import com.microsoft.identity.common.java.commands.AcquirePrtSsoTokenResult;
@@ -71,6 +86,7 @@ import com.microsoft.identity.common.java.commands.parameters.InteractiveTokenCo
 import com.microsoft.identity.common.java.commands.parameters.RemoveAccountCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.RopcTokenCommandParameters;
 import com.microsoft.identity.common.java.commands.parameters.SilentTokenCommandParameters;
+import com.microsoft.identity.common.java.commands.parameters.TokenCommandParameters;
 import com.microsoft.identity.common.java.controllers.BaseController;
 import com.microsoft.identity.common.java.exception.BaseException;
 import com.microsoft.identity.common.java.exception.ClientException;
@@ -84,6 +100,7 @@ import com.microsoft.identity.common.java.providers.oauth2.AuthorizationResult;
 import com.microsoft.identity.common.java.providers.oauth2.IDToken;
 import com.microsoft.identity.common.java.result.AcquireTokenResult;
 import com.microsoft.identity.common.java.result.GenerateShrResult;
+import com.microsoft.identity.common.java.util.BrokerProtocolVersionUtil;
 import com.microsoft.identity.common.java.util.ResultFuture;
 import com.microsoft.identity.common.java.util.ported.LocalBroadcaster;
 import com.microsoft.identity.common.java.util.ported.PropertyBag;
@@ -94,24 +111,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import lombok.EqualsAndHashCode;
-
-import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.CLIENT_ADVERTISED_MAXIMUM_BP_VERSION_KEY;
-import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.CLIENT_CONFIGURED_MINIMUM_BP_VERSION_KEY;
-import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_NAME;
-import static com.microsoft.identity.common.adal.internal.AuthenticationConstants.Broker.MSAL_TO_BROKER_PROTOCOL_VERSION_CODE;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_ACQUIRE_TOKEN_SILENT;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GENERATE_SHR;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_ACCOUNTS;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_CURRENT_ACCOUNT_IN_SHARED_DEVICE;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_DEVICE_MODE;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_GET_INTENT_FOR_INTERACTIVE_REQUEST;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_REMOVE_ACCOUNT;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_SIGN_OUT_FROM_SHARED_DEVICE;
-import static com.microsoft.identity.common.internal.broker.ipc.BrokerOperationBundle.Operation.MSAL_SSO_TOKEN;
-import static com.microsoft.identity.common.internal.controllers.BrokerOperationExecutor.BrokerOperation;
-import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterAliases.RETURN_BROKER_INTERACTIVE_ACQUIRE_TOKEN_RESULT;
-import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterFields.REQUEST_CODE;
-import static com.microsoft.identity.common.java.AuthenticationConstants.LocalBroadcasterFields.RESULT_CODE;
 
 /**
  * The implementation of MSAL Controller for Broker.
@@ -146,7 +145,7 @@ public class BrokerMsalController extends BaseController {
     }
 
     public BrokerMsalController(@NonNull final Context applicationContext) {
-        mComponents = AndroidPlatformComponents.createFromContext(applicationContext);
+        mComponents = AndroidPlatformComponentsFactory.createFromContext(applicationContext);
         mApplicationContext = applicationContext;
         mActiveBrokerPackageName = getActiveBrokerPackageName();
         if (TextUtils.isEmpty(mActiveBrokerPackageName)) {
@@ -173,9 +172,8 @@ public class BrokerMsalController extends BaseController {
      * Order of objects in the list will reflects the order of strategies that will be used.
      */
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    protected @NonNull
-    List<IIpcStrategy> getIpcStrategies(final Context applicationContext,
-                                        final String activeBrokerPackageName) {
+    @NonNull
+    protected List<IIpcStrategy> getIpcStrategies(final Context applicationContext, final String activeBrokerPackageName) {
         final String methodTag = TAG + ":getIpcStrategies";
         final List<IIpcStrategy> strategies = new ArrayList<>();
         final StringBuilder sb = new StringBuilder(100);
@@ -241,6 +239,7 @@ public class BrokerMsalController extends BaseController {
                 bundle);
 
         final String negotiatedProtocolVersion = mResultAdapter.verifyHelloFromResultBundle(
+                mActiveBrokerPackageName,
                 strategy.communicateToBroker(helloBundle)
         );
 
@@ -384,6 +383,7 @@ public class BrokerMsalController extends BaseController {
 
                     @Override
                     public void performPrerequisites(final @NonNull IIpcStrategy strategy) throws BaseException {
+                        verifyTokenParametersAreSupported(parameters);
                         negotiatedBrokerProtocolVersion = hello(strategy, parameters.getRequiredBrokerProtocolVersion());
                     }
 
@@ -445,6 +445,7 @@ public class BrokerMsalController extends BaseController {
 
                     @Override
                     public void performPrerequisites(final @NonNull IIpcStrategy strategy) throws BaseException {
+                        verifyTokenParametersAreSupported(parameters);
                         negotiatedBrokerProtocolVersion = hello(strategy, parameters.getRequiredBrokerProtocolVersion());
                     }
 
@@ -769,7 +770,6 @@ public class BrokerMsalController extends BaseController {
                     public @NonNull
                     Boolean extractResultBundle(final @Nullable Bundle resultBundle) throws BaseException {
                         mResultAdapter.verifyRemoveAccountResultFromBundle(resultBundle);
-                        logOutFromBrowser(mApplicationContext, parameters);
                         return true;
                     }
 
@@ -789,42 +789,6 @@ public class BrokerMsalController extends BaseController {
                     public void putValueInSuccessEvent(final @NonNull ApiEndEvent event, final @NonNull Boolean result) {
                     }
                 });
-    }
-
-    /**
-     * Invoke the logout endpoint on the specified browser.
-     * If there are more than 1 session in the browser, an account picker will be displayed.
-     * (Alternatively, we could pass the optional sessionID as one of the query string parameter, but we're not storing that at the moment).
-     *
-     * @param context    {@link Context} application context.
-     * @param parameters a {@link RemoveAccountCommandParameters}.
-     */
-    private void logOutFromBrowser(final @NonNull Context context,
-                                   final @NonNull RemoveAccountCommandParameters parameters) {
-        final String methodTag = TAG + ":logOutFromBrowser";
-
-        String browserPackageName = null;
-        try {
-            final Browser browser = BrowserSelector.select(context, parameters.getBrowserSafeList());
-            browserPackageName = browser.getPackageName();
-        } catch (final ClientException e) {
-            // Best effort. If none is passed to broker, then it will let the OS decide.
-            Logger.error(methodTag, e.getErrorCode(), e);
-        }
-
-        try {
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setData(Uri.parse(AuthenticationConstants.Browser.LOGOUT_ENDPOINT_V2));
-            if (browserPackageName != null) {
-                intent.setPackage(browserPackageName);
-            }
-            context.startActivity(intent);
-
-        } catch (final ActivityNotFoundException e) {
-            Logger.error(methodTag,
-                    "Failed to launch browser sign out with browser=[" + browserPackageName + "]. Skipping.", e);
-        }
     }
 
     // Suppressing rawtype warnings due to the generic type AuthorizationResult
@@ -1004,5 +968,20 @@ public class BrokerMsalController extends BaseController {
     @SuppressWarnings(WarningType.unchecked_warning)
     private void msalOAuth2TokenCacheSetSingleSignOnState(@SuppressWarnings(WarningType.rawtype_warning) @NonNull MsalOAuth2TokenCache msalOAuth2TokenCache, MicrosoftStsAccount microsoftStsAccount, MicrosoftRefreshToken microsoftRefreshToken) throws ClientException {
         msalOAuth2TokenCache.setSingleSignOnState(microsoftStsAccount, microsoftRefreshToken);
+    }
+
+    /**
+     * Verifies if the token parameters are supported by the required broker protocol version
+     * @param parameters Token Parameters for verify
+     * @throws ClientException if the token parameters are not supported
+     */
+    private void verifyTokenParametersAreSupported(@NonNull final TokenCommandParameters parameters) throws ClientException {
+        final String requiredProtocolVersion = parameters.getRequiredBrokerProtocolVersion();
+        if (parameters.getAuthenticationScheme() instanceof PopAuthenticationSchemeWithClientKeyInternal
+                && !BrokerProtocolVersionUtil.canSupportPopAuthenticationSchemeWithClientKey(requiredProtocolVersion)){
+            throw new ClientException(ClientException.AUTH_SCHEME_NOT_SUPPORTED,
+                    "The min broker protocol version for PopAuthenticationSchemeWithClientKey should be equal or more than 11.0."
+            + " Current required version is set to: " + parameters.getRequiredBrokerProtocolVersion());
+        }
     }
 }

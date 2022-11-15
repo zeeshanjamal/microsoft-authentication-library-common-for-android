@@ -81,12 +81,7 @@ public class SamsungSettings extends BaseSettings {
         Logger.i(TAG, "Removing Account from Samsung Device..");
         launchAccountListPage();
         try {
-            // scroll down the recycler view to find the list item for this account
-            final UiObject account = UiAutomatorUtils.obtainChildInScrollable(
-                    "android:id/list",
-                    username
-            );
-
+            final UiObject account = UiAutomatorUtils.obtainUiObjectWithText(username);
             // Click into this account
             account.click();
 
@@ -115,6 +110,14 @@ public class SamsungSettings extends BaseSettings {
     public void addWorkAccount(@NonNull final ITestBroker broker,
                                @NonNull final String username,
                                @NonNull final String password) {
+        addWorkAccount(broker, username, password, false);
+    }
+
+    @Override
+    public void addWorkAccount(@NonNull final ITestBroker broker,
+                               @NonNull final String username,
+                               @NonNull final String password,
+                               final boolean isFederatedUser) {
         Logger.i(TAG, "Adding Work Account on Samsung Device..");
         launchAddAccountPage();
 
@@ -129,7 +132,7 @@ public class SamsungSettings extends BaseSettings {
             workAccount.click();
 
             // add work account by performing join via the broker
-            broker.performJoinViaJoinActivity(username, password);
+            broker.performJoinViaJoinActivity(username, password, isFederatedUser);
 
             // activate broker app as admin
             activateAdmin();

@@ -26,14 +26,14 @@ import androidx.annotation.NonNull;
 import androidx.test.uiautomator.UiObject;
 import androidx.test.uiautomator.UiObjectNotFoundException;
 
+import com.microsoft.identity.client.ui.automation.installer.IAppInstaller;
 import com.microsoft.identity.client.ui.automation.installer.PlayStore;
 import com.microsoft.identity.client.ui.automation.interaction.FirstPartyAppPromptHandlerParameters;
 import com.microsoft.identity.client.ui.automation.interaction.microsoftsts.MicrosoftStsPromptHandler;
 import com.microsoft.identity.client.ui.automation.interaction.microsoftsts.MicrosoftStsPromptHandlerParameters;
 import com.microsoft.identity.client.ui.automation.logging.Logger;
+import com.microsoft.identity.client.ui.automation.utils.CommonUtils;
 import com.microsoft.identity.client.ui.automation.utils.UiAutomatorUtils;
-
-import org.junit.Assert;
 
 /**
  * A model for interacting with the Teams Android App during UI Test.
@@ -43,13 +43,24 @@ public class TeamsApp extends App implements IFirstPartyApp {
     private final static String TAG = TeamsApp.class.getSimpleName();
     private static final String TEAMS_PACKAGE_NAME = "com.microsoft.teams";
     private static final String TEAMS_APP_NAME = "Microsoft Teams";
+    private static final String TEAMS_APK = "Teams.apk";
 
     public TeamsApp() {
         super(TEAMS_PACKAGE_NAME, TEAMS_APP_NAME, new PlayStore());
     }
 
+    public TeamsApp(@NonNull final IAppInstaller appInstaller) {
+        super(TEAMS_PACKAGE_NAME, TEAMS_APP_NAME, appInstaller);
+        localApkFileName = TEAMS_APK;
+    }
+
     @Override
     public void handleFirstRun() {
+        // nothing needed here
+    }
+
+    @Override
+    public void initialiseAppImpl() {
         // nothing needed here
     }
 
@@ -66,6 +77,8 @@ public class TeamsApp extends App implements IFirstPartyApp {
                         "com.microsoft.teams:id/title",
                         username
                 );
+
+                email.waitForExists(CommonUtils.FIND_UI_ELEMENT_TIMEOUT);
 
                 email.click();
 

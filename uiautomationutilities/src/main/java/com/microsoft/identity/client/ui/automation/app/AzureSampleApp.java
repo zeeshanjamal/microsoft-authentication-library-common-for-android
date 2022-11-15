@@ -36,6 +36,8 @@ import com.microsoft.identity.client.ui.automation.utils.UiAutomatorUtils;
 
 import org.junit.Assert;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * A model for interacting with the Azure Sample App for MSAL Android during UI Test.
  * This refers to app stored in Azure-Samples/ms-identity-android-java repository.
@@ -47,15 +49,28 @@ public class AzureSampleApp extends App {
     private static final String AZURE_SAMPLE_PACKAGE_NAME = "com.azuresamples.msalandroidapp";
     private static final String AZURE_SAMPLE_APP_NAME = "Azure Sample";
     public final static String AZURE_SAMPLE_APK = "AzureSample.apk";
+    public final static String OLD_AZURE_SAMPLE_APK = "OldAzureSample.apk";
 
     public AzureSampleApp() {
         super(AZURE_SAMPLE_PACKAGE_NAME, AZURE_SAMPLE_APP_NAME, new LocalApkInstaller());
         localApkFileName = AZURE_SAMPLE_APK;
     }
 
+    public AzureSampleApp(@NonNull final String azureSampleApk,
+                                        @NonNull final String updateAzureSampleApk) {
+        super(AZURE_SAMPLE_PACKAGE_NAME, AZURE_SAMPLE_APP_NAME, new LocalApkInstaller());
+        localApkFileName = azureSampleApk;
+        localUpdateApkFileName = updateAzureSampleApk;
+    }
+
     @Override
     public void handleFirstRun() {
         // nothing required
+    }
+
+    @Override
+    public void initialiseAppImpl() {
+       // nothing required
     }
 
     /**
@@ -88,6 +103,13 @@ public class AzureSampleApp extends App {
                 new MicrosoftStsPromptHandler(promptHandlerParameters);
 
         microsoftStsPromptHandler.handlePrompt(username, password);
+
+        // sleep as it can take a bit for UPN to appear in Azure Sample app
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        } catch (InterruptedException e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -106,9 +128,15 @@ public class AzureSampleApp extends App {
      */
     public void confirmSignedIn(@NonNull final String username) {
         Logger.i(TAG, "Confirming account with supplied username is signed in..");
+        try {
+            Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         final UiObject signedInUser = UiAutomatorUtils.obtainUiObjectWithResourceId("com.azuresamples.msalandroidapp:id/current_user");
         try {
-            Assert.assertEquals("User is signed into Azure Sample App", signedInUser.getText(), username);
+            Assert.assertEquals("User is signed into Azure Sample App", username, signedInUser.getText());
         } catch (final UiObjectNotFoundException e) {
             throw new AssertionError(e);
         }

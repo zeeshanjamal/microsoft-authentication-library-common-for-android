@@ -35,7 +35,7 @@ import androidx.test.uiautomator.UiSelector;
 
 import com.microsoft.identity.client.ui.automation.logging.Logger;
 import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.FIND_UI_ELEMENT_TIMEOUT;
-import static org.junit.Assert.fail;
+import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.FIND_UI_ELEMENT_TIMEOUT_LONG;
 
 /**
  * This class contains utility methods for leveraging UI Automator to interact with UI elements.
@@ -289,6 +289,7 @@ public class UiAutomatorUtils {
         final UiObject inputField = obtainUiObjectWithResourceId(resourceId);
 
         try {
+            inputField.waitForExists(FIND_UI_ELEMENT_TIMEOUT);
             inputField.setText(inputText);
             closeKeyboardIfNeeded();
         } catch (final UiObjectNotFoundException e) {
@@ -306,6 +307,7 @@ public class UiAutomatorUtils {
         final UiObject button = obtainUiObjectWithResourceId(resourceId);
 
         try {
+            button.waitForExists(FIND_UI_ELEMENT_TIMEOUT);
             button.click();
         } catch (final UiObjectNotFoundException e) {
             throw new AssertionError(e);
@@ -314,6 +316,42 @@ public class UiAutomatorUtils {
 
     /**
      * Clicks the button element associated to the supplied resource id.
+     * Do not throw an exception if the button is not found.
+     *
+     * @param resourceId the resource id of the button to click
+     */
+    public static void handleButtonClickSafely(@NonNull final String resourceId) {
+        Logger.i(TAG, "Clicks the button element associated to the resource id:" + resourceId);
+        final UiObject button = obtainUiObjectWithResourceId(resourceId);
+
+        try {
+            button.waitForExists(FIND_UI_ELEMENT_TIMEOUT);
+            button.click();
+        } catch (final UiObjectNotFoundException e) {
+            Logger.i(TAG, "Button " + resourceId + " was not found: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Clicks the button element associated to the supplied resource id with a longer timeout.
+     * Add parameter to give a custom timeout.
+     * @param resourceId the resource id of the button to click
+     * @param existsTimeout how long to wait for ui element
+     */
+    public static void handleButtonClick(@NonNull final String resourceId, final long existsTimeout) {
+        Logger.i(TAG, "Clicks the button element associated to the resource id (custom timeout):" + resourceId);
+        final UiObject button = obtainUiObjectWithResourceId(resourceId);
+
+        try {
+            button.waitForExists(existsTimeout);
+            button.click();
+        } catch (final UiObjectNotFoundException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * Clicks the button element associated to the supplied text.
      *
      * @param text the text on the button to click
      */
