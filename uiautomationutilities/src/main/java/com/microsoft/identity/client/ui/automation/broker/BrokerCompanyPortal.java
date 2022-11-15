@@ -53,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 
 import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.FIND_UI_ELEMENT_TIMEOUT;
-import static com.microsoft.identity.client.ui.automation.utils.CommonUtils.ENROLL_WAIT_DURATION;
 
 /**
  * A model for interacting with the Company Portal Broker App during UI Test.
@@ -70,7 +69,7 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
     private final static int PASSWORD_UI_ATTEMPT_COUNT = 3;
 
     // Timeout to wait for complete enrollment page to appear
-    final static long COMPLETE_ENROLLMENT_PAGE_TIMEOUT = TimeUnit.SECONDS.toMillis(45);
+    final static long COMPLETE_ENROLLMENT_PAGE_TIMEOUT = TimeUnit.SECONDS.toMillis(75);
 
     private boolean enrollmentPerformedSuccessfully;
     private boolean batteryOptimizationTurnedOff;
@@ -245,14 +244,6 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
             ((SamsungSettings) deviceSettings).enrollInKnox();
         }
 
-        // Seems like we are failing here sometimes because enrollment takes longer than expected
-        // adding a brief wait to improve odds of pass
-        try {
-            Thread.sleep(ENROLL_WAIT_DURATION);
-        } catch (Exception e){
-            Assert.fail("Failed on thread sleep: " + e);
-        }
-
         // make sure we are on the page to complete setup
         final UiObject setupCompletePage = UiAutomatorUtils.obtainUiObjectWithResourceId(
                 "com.microsoft.windowsintune.companyportal:id/setup_title"
@@ -353,10 +344,8 @@ public class BrokerCompanyPortal extends AbstractTestBroker implements ITestBrok
         UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/setup_positive_button");
 
         // complete work profile setup
-        UiObject doneButton = UiAutomatorUtils.obtainUiObjectWithResourceId("com.microsoft.windowsintune.companyportal:id/setup_center_button");
-        doneButton.waitForExists(ENROLL_WAIT_DURATION);
         try {
-            doneButton.click();
+            UiAutomatorUtils.handleButtonClick("com.microsoft.windowsintune.companyportal:id/setup_center_button", COMPLETE_ENROLLMENT_PAGE_TIMEOUT);
             UiAutomatorUtils.obtainUiObjectWithText("Got It").click();
         }
         catch (Exception e){
