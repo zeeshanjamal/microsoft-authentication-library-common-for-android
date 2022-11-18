@@ -154,7 +154,7 @@ public class BrowserEdge extends App implements IBrowser {
                                                @NonNull final String password,
                                                @NonNull final FirstPartyAppPromptHandlerParameters promptHandlerParameters) throws UiObjectNotFoundException {
         final UiObject signInWithWorkAccountBtn = UiAutomatorUtils.obtainUiObjectWithText(
-                "Sign in with a work or school account"
+                "Add account"
         );
 
         // click Sign In with work or school account btn

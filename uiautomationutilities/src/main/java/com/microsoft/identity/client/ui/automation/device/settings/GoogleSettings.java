@@ -149,6 +149,16 @@ public class GoogleSettings extends BaseSettings {
             // Click into this account type
             workAccount.click();
 
+            // Sometimes the first Work Account button click doesn't do anything (no exception is thrown, but the button is not pressed)?
+            // Adding another check to try clicking it again
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+            } catch(Exception e) {
+            }
+            if (workAccount.exists()) {
+                workAccount.click();
+            }
+
             // perform Join using the supplied broker
             broker.performJoinViaJoinActivity(username, password, isFederatedUser);
 
